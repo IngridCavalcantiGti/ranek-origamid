@@ -33,7 +33,7 @@
       "plugin:vue/essential",
       "eslint:recommended"
     ],
-    "rules": { "vue/html-quotes": "double" },
+    "rules": { },
     "parserOptions": {
       "parser": "babel-eslint"
     }
