@@ -1,46 +1,58 @@
 <template>
     <section class="produtos-container">
-        <div v-if="produtos  && produtos.length" class="produtos">
-            <div class="produto"  v-for="produto in produtos" :key="produto.id">
+        <transition mode="out-in">
+        <div v-if="produtos  && produtos.length" class="produtos" key="produtos">
+            <div class="produto"  v-for="(produto, index) in produtos" :key="index">
                 <router-link to="/">
                 <img v-if="produto.fotos" :src="produto.fotos[0].src" :alt="produto.fotos[0].titulo">
                 <p class="preco">{{ produto.preco}}</p>
                 <h2 class="titulo">{{ produto.nome }}</h2>
-                <p class="sem-resultado">{{ produto.descricao}}</p>
+                <p>{{ produto.descricao}}</p>
                  </router-link>  
             </div> 
+            <ProdutosPaginar 
+            :produtosTotal="produtosTotal"
+            :produtosPorPagina="produtosPorPagina"
+            />
         </div>
         <div v-else-if="produtos && produtos.length === 0">
-            <p>
-                Busca sme resultados. Tente buscar outro termio.
-            </p>
+            <p class="sem-resultados" key="sem-resultados">Busca sem resultados. Tente buscar outro termo.</p>
         </div>
+            <PaginaCarregando v-else key="carregando"/>
+        </transition>
      </section>
 </template>
 
 <script>
+import ProdutosPaginar from "@/components/ProdutosPaginar.vue"
 import { api } from "/services.js";
 import { serialize} from "/helpers.js"
 export default {
+
+    components: {
+        ProdutosPaginar
+    },
     data() {
         return{
             produtos: null,
-            produtosPorPagina: 9
+            produtosPorPagina: 9,
+            produtosTotal: 0
         }
     },
     computed: {
         url() {
-            const query = serialize(this.route.query);
-            return `produto/?_limit=${this.produtosPorPagina}"${query}`;
+            const query = serialize(this.$route.query);
+            return `/produto?_limit=${this.produtosPorPagina}${query}`;
             
         }  
     },
     methods: {
         getProdutos() {
-            api.get("/produto")
-            .then(response => {
+               this.produtos = null;
+                api.get(this.url).then(response => {
+                this.produtosTotal = Number(response.headers['x-total-count'])
                 this.produtos = response.data;
-            })
+            });
         }
     },
     watch: {
@@ -95,7 +107,7 @@ export default {
     font-weight: bold;
 }
 
-.sem-resultado {
+.sem-resultados {
     text-align: center;
 
 }
