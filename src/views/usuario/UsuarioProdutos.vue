@@ -54,6 +54,7 @@ export default {
     if (this.login) {
       this.getUsuarioProdutos();
     }
+    document.title = "Usuário";
   }
 };
 </script>
